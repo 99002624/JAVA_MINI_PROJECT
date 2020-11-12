@@ -46,6 +46,53 @@ public class SocketClient extends JFrame implements ActionListener, Runnable {
 
         input_Text.addActionListener(this); //Event registration
     }
+ public void serverConnection() {
+        try {
+            String IP = JOptionPane.showInputDialog(this, "Please enter a server IP.", JOptionPane.INFORMATION_MESSAGE);
+            sk = new Socket(IP, 1234);
+
+            String name = JOptionPane.showInputDialog(this, "Please enter a nickname", JOptionPane.INFORMATION_MESSAGE);
+/*            while (name.length() > 7) {
+                name = JOptionPane.showInputDialog(this, "Please enter a nickname.(7 characters or less)", JOptionPane.INFORMATION_MESSAGE);
+            }
+*/
+            //read
+            br = new BufferedReader(new InputStreamReader(sk.getInputStream()));
+
+            //writing
+            pw = new PrintWriter(sk.getOutputStream(), true);
+            pw.println(name); // Send to server side
+
+            new Thread(this).start();
+
+        } catch (Exception e) {
+            System.out.println(e + " Socket Connection error");
+        }
+    }
+
+    public static void main(String[] args) {
+        new SocketClient().serverConnection(); //Method call at the same time object creation
+    }
+
+    @Override
+    public void run() {
+        String data = null;
+        try {
+            while ((data = br.readLine()) != null) {
+                textArea.append(data + "\n"); //textArea Decrease the position of the box's scroll bar by the length of the text entered
+                textArea.setCaretPosition(textArea.getText().length());
+            }
+        } catch (Exception e) {
+            System.out.println(e + "--> Client run fail");
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String data = input_Text.getText();
+        pw.println(data); // Send to server side
+        input_Text.setText("");
+    }
 
    
 }

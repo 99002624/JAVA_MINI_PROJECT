@@ -68,4 +68,39 @@ public class SocketServer {
     public static void main(String[] args) {
         new SocketServer();
     }
+class ServerThread extends Thread {
+    SocketServer server;
+    PrintWriter pw;
+    String name;
+
+    public ServerThread(SocketServer server) {
+        this.server = server;
+    }
+
+    @Override
+    public void run() {
+        try {
+            // read
+            BufferedReader br = new BufferedReader(new InputStreamReader(server.sk.getInputStream()));
+
+            // writing
+            pw = new PrintWriter(server.sk.getOutputStream(), true);
+            name = br.readLine();
+            server.broadCast("**["+name+"] Entered**");
+
+            String data;
+            while((data = br.readLine()) != null ){
+                if(data == "/list"){
+                    pw.println("a");
+                }
+                server.broadCast("["+name+"] "+ data);
+            }
+        } catch (Exception e) {
+            //Remove the current thread from the ArrayList.
+            server.removeThread(this);
+            server.broadCast("**["+name+"] Left**");
+            System.out.println(server.sk.getInetAddress()+" - ["+name+"] Exit");
+            System.out.println(e + "---->");
+        }
+    }
 }
